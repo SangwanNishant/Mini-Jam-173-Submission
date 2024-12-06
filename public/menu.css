@@ -1,0 +1,18 @@
+html, body {
+    height: 100%; /* Full height for the body */
+    margin: 0;    /* Remove any default margins */
+    overflow: hidden; /* Remove scrollbars */
+}
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: url('Assets/menu.png') no-repeat center center fixed; /* Background image */
+    background-size: cover; /* Make sure the image covers the entire screen */
+    background-position: center; /* Ensure the image is centered */
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
