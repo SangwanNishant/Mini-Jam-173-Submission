@@ -24,8 +24,8 @@ let bulletsFired = 0;
 let batchReloading = false;
 
 const BATCH_SIZE = 5;
-const NORMAL_RELOAD_TIME = 180;
-const BATCH_RELOAD_TIME = 1200;
+const NORMAL_RELOAD_TIME = 200;
+const BATCH_RELOAD_TIME = 1250;
 
 let keys = {};
 
@@ -59,7 +59,7 @@ function spawnMonster() {
         y: 0, // Start from the top of the screen
         width: 50,
         height: 50,
-        speed: 2.6, // Slightly faster falling speed
+        speed: 2.8, // Slightly faster falling speed
         attacking: false, // To check if it's started attacking
     };
 
@@ -223,7 +223,7 @@ function gameloop() {
     if (player.jumping) {
         movementSpeed *= 2;
     }
-    
+
         // Player movement logic with canvas boundaries
     if (keys["ArrowLeft"] || keys["a"]) {
         if (player.x > 40) { // Prevent moving left out of bounds
@@ -269,5 +269,19 @@ document.addEventListener("keyup", (e) => {
     keys[e.key] = false;
 });
 
-// Start the game
-gameloop();
+const backgroundImage = new Image();
+backgroundImage.src = 'Assets/bg3.png';
+backgroundImage.onload = () => {
+     // Apply the background image to the body
+     document.body.style.backgroundImage = `url(${backgroundImage.src})`;
+     document.body.style.backgroundSize = "cover";  // Make the background image cover the whole screen
+     document.body.style.backgroundPosition = "center";  // Center the image
+     document.body.style.backgroundRepeat = "no-repeat";  // Prevent repeating the image
+ 
+     // Optionally, ensure the body takes full viewport height
+     document.body.style.height = "100vh";
+     document.body.style.margin = "0";  // Remove default body margin
+
+    // Once the background image is loaded, start the game loop
+    gameloop();
+};

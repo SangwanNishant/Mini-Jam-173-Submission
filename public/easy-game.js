@@ -256,5 +256,19 @@ document.addEventListener("keyup", (e) => {
     keys[e.key] = false;
 });
 
-// Start the game
-gameloop();
+const backgroundImage = new Image();
+backgroundImage.src = 'Assets/bg3.png';
+backgroundImage.onload = () => {
+     // Apply the background image to the body
+     document.body.style.backgroundImage = `url(${backgroundImage.src})`;
+     document.body.style.backgroundSize = "cover";  // Make the background image cover the whole screen
+     document.body.style.backgroundPosition = "center";  // Center the image
+     document.body.style.backgroundRepeat = "no-repeat";  // Prevent repeating the image
+ 
+     // Optionally, ensure the body takes full viewport height
+     document.body.style.height = "100vh";
+     document.body.style.margin = "0";  // Remove default body margin
+
+    // Once the background image is loaded, start the game loop
+    gameloop();
+};
