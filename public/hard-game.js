@@ -5,6 +5,10 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+
+// Bridge height factor (relative to canvas height)
+const BRIDGE_HEIGHT_FACTOR = 0.76;
+
 // Game constants and variables
 const BASE_PLAYER_SPEED = 6;
 const JUMP_FORCE = -28;
@@ -19,22 +23,22 @@ let bullets = [];
 let monsters = [];
 let maxBullets = 8;
 let bulletReloading = false;
-let reloadTime = 220;
+let reloadTime = 200;
 let bulletsFired = 0;
 let batchReloading = false;
 
 const BATCH_SIZE = 5;
-const NORMAL_RELOAD_TIME = 220;
-const BATCH_RELOAD_TIME = 1450;
+const NORMAL_RELOAD_TIME = 200;
+const BATCH_RELOAD_TIME = 1250;
 
 let keys = {};
 
 // Player object
 const player = {
     x: 300,
-    y: canvas.height * 0.76 - 110, // Correct spawn point
-    width: 110,
-    height: 110,
+    y: canvas.height * 0.76 - 100, // Correct spawn point
+    width: 100,
+    height: 100,
     velocityY: 0,
     jumping: false,
     facing: "right",
@@ -44,7 +48,7 @@ const player = {
 // Load assets
 player.image.src = "Assets/player 1.png"; // Player image
 const monsterImage = new Image();
-monsterImage.src = "Assets/blue-monster.png"; // Monster image
+monsterImage.src = "Assets/yellow-monster.png"; // Monster image
 
 // Constants for monster behavior
 const MONSTER_STOP_Y = canvas.height * 0.76 - 60; // Y position where monsters stop falling
@@ -57,8 +61,8 @@ function spawnMonster() {
     const monster = {
         x: spawnX,
         y: 0, // Start from the top of the screen
-        width: 50,
-        height: 50,
+        width: 60,
+        height: 60,
         speed: 2.9, // Slightly faster falling speed
         attacking: false, // To check if it's started attacking
     };
@@ -219,8 +223,8 @@ function gameloop() {
     }
     player.y += player.velocityY;
 
-    if (player.y > canvas.height * 0.76 - 110) {
-        player.y = canvas.height * 0.76 - 110;
+    if (player.y > canvas.height * 0.76 - 100) {
+        player.y = canvas.height * 0.76 - 100;
         player.velocityY = 0;
         player.jumping = false;
     }
