@@ -1,8 +1,7 @@
 const express = require("express");
 const path = require("path");
 const app = express()
-const PORT = 3050
-
+const PORT = process.env.PORT || 3000;
 
 app.use(express.static('public'))
 
@@ -11,7 +10,7 @@ app.get('/', (req,res)=>{
 })
 
 app.get('/game', (req,res)=>{
-    res.sendFile(path.join(__dirname,"public", "game.html"))
+    res.sendFile(path.join(__dirname,"public", "easy-game.html"))
 })
 
 app.get('/difficulty', (req,res)=>{
@@ -19,7 +18,7 @@ app.get('/difficulty', (req,res)=>{
 })
 
 app.get('/game-easy', (req,res)=>{
-    res.sendFile(path.join(__dirname,"public", "game-easy.html"))
+    res.sendFile(path.join(__dirname,"public", "easy-game.html"))
 })
 
 app.get('/game-medium', (req,res)=>{
