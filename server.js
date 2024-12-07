@@ -29,6 +29,9 @@ app.get('/game-hard', (req,res)=>{
     res.sendFile(path.join(__dirname,"public", "hard-game.html"))
 })
 
+app.get('/win',(req,res)=>{
+    res.sendFile(path.join(__dirname,"public", "win.html"))
+})
 app.listen(PORT,()=>{
     console.log(`Server listening at http://localhost:${PORT}`)
 })

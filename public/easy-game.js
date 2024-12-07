@@ -18,11 +18,12 @@ let playerHealth = 100;
 let level = 1;
 let monstersKilled = 0;
 let gameOver = false;
+let winCondition = 100;
 let bullets = [];
 let monsters = [];
-let maxBullets = 5;
+let maxBullets = 6;
 let bulletReloading = false;
-let reloadTime = 500;
+let reloadTime = 700;
 let keys = {};
 
 // Player object
@@ -177,6 +178,12 @@ function gameloop() {
         return;
     }
 
+    if (monstersKilled >= winCondition) {
+        // Win condition: Monsters killed reaches the required amount
+        window.location.href = "/win"; // Redirect to win page
+        return;
+    }
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Update game elements
@@ -205,14 +212,21 @@ function gameloop() {
         movementSpeed *= 2;
     }
 
+        // Player movement logic with canvas boundaries
     if (keys["ArrowLeft"] || keys["a"]) {
-        player.x -= movementSpeed;
-        player.facing = "left";
+        if (player.x > 40) { // Prevent moving left out of bounds
+            player.x -= movementSpeed;
+            player.facing = "left";
+        }
     }
+
     if (keys["ArrowRight"] || keys["d"]) {
-        player.x += movementSpeed;
-        player.facing = "right";
+        if (player.x < canvas.width - player.width-150) { // Prevent moving right out of bounds
+            player.x += movementSpeed;
+            player.facing = "right";
+        }
     }
+
     if ((keys["ArrowUp"] || keys["w"]) && !player.jumping) {
         player.velocityY = JUMP_FORCE; // Initiate jump
         player.jumping = true; // Set jumping flag

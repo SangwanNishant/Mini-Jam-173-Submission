@@ -5,9 +5,6 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Bridge height factor (relative to canvas height)
-const BRIDGE_HEIGHT_FACTOR = 0.76;
-
 // Game constants and variables
 const BASE_PLAYER_SPEED = 6;
 const JUMP_FORCE = -25;
@@ -20,22 +17,22 @@ let monstersKilled = 0;
 let gameOver = false;
 let bullets = [];
 let monsters = [];
-let maxBullets = 5;
+let maxBullets = 8;
 let bulletReloading = false;
-let reloadTime = 280;
+let reloadTime = 180;
 let bulletsFired = 0;
 let batchReloading = false;
 
 const BATCH_SIZE = 5;
-const NORMAL_RELOAD_TIME = 280;
-const BATCH_RELOAD_TIME = 1800;
+const NORMAL_RELOAD_TIME = 180;
+const BATCH_RELOAD_TIME = 1200;
 
 let keys = {};
 
 // Player object
 const player = {
     x: 300,
-    y: canvas.height * BRIDGE_HEIGHT_FACTOR - 110, // Correct spawn point
+    y: canvas.height * 0.76 - 110, // Correct spawn point
     width: 110,
     height: 110,
     velocityY: 0,
@@ -50,9 +47,10 @@ const monsterImage = new Image();
 monsterImage.src = "Assets/blue-monster.png"; // Monster image
 
 // Constants for monster behavior
-const MONSTER_STOP_Y = canvas.height * BRIDGE_HEIGHT_FACTOR - 60; // Y position where monsters stop falling
+const MONSTER_STOP_Y = canvas.height * 0.76 - 60; // Y position where monsters stop falling
 
 // Functions
+
 function spawnMonster() {
     const spawnX = Math.random() * (canvas.width - 50); // Spawn randomly on X-axis
 
@@ -93,6 +91,15 @@ function shootBullet() {
         setTimeout(() => {
             bulletReloading = false;
         }, NORMAL_RELOAD_TIME);
+    }
+}
+
+function reloadBullets() {
+    if (bullets.length < maxBullets) {
+        const bulletsToReload = maxBullets - bullets.length;
+        for (let i = 0; i < bulletsToReload; i++) {
+            shootBullet();  // Refill the bullets
+        }
     }
 }
 
@@ -205,8 +212,8 @@ function gameloop() {
     }
     player.y += player.velocityY;
 
-    if (player.y > canvas.height * BRIDGE_HEIGHT_FACTOR - 110) {
-        player.y = canvas.height * BRIDGE_HEIGHT_FACTOR - 110;
+    if (player.y > canvas.height * 0.76 - 110) {
+        player.y = canvas.height * 0.76 - 110;
         player.velocityY = 0;
         player.jumping = false;
     }
@@ -216,15 +223,22 @@ function gameloop() {
     if (player.jumping) {
         movementSpeed *= 2;
     }
-
+    
+        // Player movement logic with canvas boundaries
     if (keys["ArrowLeft"] || keys["a"]) {
-        player.x -= movementSpeed;
-        player.facing = "left";
+        if (player.x > 40) { // Prevent moving left out of bounds
+            player.x -= movementSpeed;
+            player.facing = "left";
+        }
     }
+
     if (keys["ArrowRight"] || keys["d"]) {
-        player.x += movementSpeed;
-        player.facing = "right";
+        if (player.x < canvas.width - player.width - 100) { // Prevent moving right out of bounds
+            player.x += movementSpeed;
+            player.facing = "right";
+        }
     }
+
     if ((keys["ArrowUp"] || keys["w"]) && !player.jumping) {
         player.velocityY = JUMP_FORCE;
         player.jumping = true;
@@ -248,6 +262,7 @@ function gameloop() {
 document.addEventListener("keydown", (e) => {
     keys[e.key] = true;
     if (e.key === " " || e.key === "z") shootBullet();
+    if (e.key === "r" || e.key === "R") reloadBullets(); // Reload bullets when 'R' is pressed
 });
 
 document.addEventListener("keyup", (e) => {
