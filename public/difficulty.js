@@ -25,11 +25,11 @@ document.getElementById('confirm-btn').addEventListener('click', function() {
     }
     // Redirect based on the selected difficulty
     if (selectedDifficulty === "easy") {
-        window.location.href = "/game/easy";  // Redirect to easy game page
+        window.location.href = "/game-easy";  // Redirect to easy game page
     } else if (selectedDifficulty === "medium") {
-        window.location.href = "/game/medium";  // Redirect to medium game page
+        window.location.href = "/game-medium";  // Redirect to medium game page
     } else if (selectedDifficulty === "hard") {
-        window.location.href = "/game/hard";  // Redirect to hard game page
+        window.location.href = "/game-hard";  // Redirect to hard game page
     }
 });
 
