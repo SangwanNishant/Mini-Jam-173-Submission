@@ -1,320 +1,246 @@
-const canvas = document.getElementById('gameCanvas');
+const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 // Set canvas size to the full window
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const PLAYER_SPEED = 5; // Normal movement speed
-const JUMP_SPEED_MULTIPLIER = 2; // Speed multiplier for moving while jumping
-const GRAVITY = 2; // Gravity for falling down
-const JUMP_FORCE = -30; // Force applied when jumping
-const BULLET_SPEED = 10; // Speed of bullets
-const MONSTER_SPEED = 2; // Speed of monsters
+// Game constants and variables
+const BASE_PLAYER_SPEED = 7;
+const JUMP_FORCE = -30;
+const GRAVITY = 2.1;
+const BULLET_SPEED = 10;
 
-let playerHealth = 100; // Player health
-let level = 1; // Current game level
-let totalMonsters = 40; // Total monsters for the current level
-let monstersKilled = 0; // Number of monsters killed
-let gameOver = false; // Game over state
-let bullets = []; // Bullets array
-let maxBullets = 5; // Max number of bullets per magazine
-let currentBullets = 0; // Number of bullets currently fired
-let bulletReloading = false; // Bullet reload state
-let reloadTime = 500; // Reload time in ms
-let reloadTimer = 0; // Timer for reloading bullets
+let playerHealth = 100;
+let level = 1;
+let monstersKilled = 0;
+let gameOver = false;
+let bullets = [];
+let monsters = [];
+let maxBullets = 5;
+let bulletReloading = false;
+let reloadTime = 500;
+let keys = {};
 
 // Player object
 const player = {
-    x: 300, // Horizontal position
-    y: 485, // Initial vertical position
+    x: 300,
+    y: canvas.height - 290,  // Correct spawn point
     width: 110,
     height: 110,
-    velocityY: 0, // Vertical velocity (for jumping and falling)
-    jumping: false, // Whether the player is currently jumping
-    originalY: 485, // The ground level position
-    facing: "right", // Direction the player is facing ("right" or "left")
+    velocityY: 0,
+    jumping: false,
+    facing: "right",
     image: new Image(),
 };
 
-// Player image loading
-player.image.src = "Assets/player 1.png";
-
-// Background image loading
-const bgImg = new Image();
-bgImg.src = "Assets/bg1.png";
-
-let bgLoaded = false;
-bgImg.onload = function () {
-    bgLoaded = true;
-    if (player.image.complete) {
-        gameloop(); // Start the game loop once the player image is loaded
-    }
-};
-
-// Monster image
+// Load assets
+player.image.src = "Assets/player 1.png"; // Player image
 const monsterImage = new Image();
-monsterImage.src = "Assets/blue-monster.png";
+monsterImage.src = "Assets/blue-monster.png"; // Monster image
 
-// Monsters array
-const monsters = [];
+// Constants for monster behavior
+const MONSTER_STOP_Y = canvas.height - 260; // Y position where monsters stop falling
 
-// Keyboard controls
-let keys = {}; // Object to track key presses
-document.addEventListener('keydown', function (e) {
-    keys[e.key] = true;
+// Functions
+function spawnMonster() {
+    const spawnX = Math.random() * (canvas.width - 50);  // Spawn randomly on X-axis
+    
+    const monster = {
+        x: spawnX,
+        y: 0, // Start from the top of the screen
+        width: 50,
+        height: 50,
+        speed: 2, // Falling speed
+        attacking: false, // To check if it's started attacking
+    };
+    
+    monsters.push(monster);
+}
 
-    // Trigger jump when either "ArrowUp" or "W" is pressed, and the player is not already jumping
-    if ((e.key === "ArrowUp" || e.key === "w") && !player.jumping) {
-        player.velocityY = JUMP_FORCE; // Apply upward force
-        player.jumping = true; // Mark the player as jumping
+function shootBullet() {
+    if (bulletReloading || bullets.length >= maxBullets) return;
+
+    const bullet = {
+        x: player.facing === "right" ? player.x + player.width : player.x,
+        y: player.y + player.height / 2 - 5,
+        width: 20,
+        height: 10,
+        direction: player.facing === "right" ? 1 : -1,
+    };
+
+    bullets.push(bullet);
+
+    if (bullets.length >= maxBullets) {
+        bulletReloading = true;
+        setTimeout(() => {
+            bulletReloading = false;
+        }, reloadTime);
     }
+}
 
-    // Shoot bullet on pressing space if not reloading
-    if (e.key === " " && !bulletReloading && currentBullets < maxBullets) {
-        shootBullet();
-    }
-});
-
-document.addEventListener('keyup', function (e) {
-    keys[e.key] = false;
-});
-
-// Game loop function
-function gameloop() {
-    if (gameOver) {
-        displayGameOver();
-        return; // Stop the game loop
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-
-    // Draw the background
-    if (bgLoaded) {
-        ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-    }
-
-    // Handle horizontal movement with boundaries, allow movement while jumping
-    let moveSpeed = PLAYER_SPEED; // Default movement speed
-
-    // If the player is jumping, double the movement speed
-    if (player.jumping) {
-        moveSpeed = PLAYER_SPEED * JUMP_SPEED_MULTIPLIER;
-    }
-
-    if ((keys["ArrowLeft"] || keys["a"]) && player.x > 190) {
-        player.x -= moveSpeed; // Move left with increased speed while jumping
-        player.facing = "left";
-    }
-    if ((keys["ArrowRight"] || keys["d"]) && player.x + player.width < canvas.width - 150) {
-        player.x += moveSpeed; // Move right with increased speed while jumping
-        player.facing = "right";
-    }
-
-    // Handle jumping (gravity effect)
-    if (player.jumping) {
-        player.velocityY += GRAVITY; // Apply gravity
-        player.y += player.velocityY; // Update vertical position
-
-        // Check if the player has landed back on the ground
-        if (player.y >= player.originalY) {
-            player.y = player.originalY; // Reset to ground level
-            player.velocityY = 0; // Stop vertical movement
-            player.jumping = false; // Allow jumping again
-        }
-    }
-
-    // Draw the player with flipping logic
-    ctx.save();
-    if (player.facing === "left") {
-        ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
-        ctx.scale(-1, 1);
-        ctx.drawImage(player.image, -player.width / 2, -player.height / 2, player.width, player.height);
-    } else {
-        ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
-    }
-    ctx.restore();
-
-    // Update and draw bullets
+function updateBullets() {
     bullets.forEach((bullet, index) => {
-        bullet.x += bullet.direction === "right" ? BULLET_SPEED : -BULLET_SPEED;
+        bullet.x += bullet.direction * BULLET_SPEED;
 
-        // Remove bullet if it goes off-screen
+        // Remove bullets that go off-screen
         if (bullet.x < 0 || bullet.x > canvas.width) {
             bullets.splice(index, 1);
         }
 
-        // Draw bullet
-        ctx.fillStyle = "red";
-        ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
-    });
-
-    // Update and draw monsters
-    monsters.forEach((monster, index) => {
-        // Increase monster speed as level increases
-        const monsterSpeed = MONSTER_SPEED + (level - 1) * 0.5;
-
-        // Move monster toward the player
-        monster.x += monster.x < player.x ? monsterSpeed : -monsterSpeed;
-
-        // Check collision with player (initial damage on contact, then small continuous damage)
-        if (
-            monster.x < player.x + player.width &&
-            monster.x + monster.width > player.x &&
-            monster.y < player.y + player.height &&
-            monster.y + monster.height > player.y
-        ) {
-            if (!monsterCollision) {
-                // First contact - reduce health more
-                playerHealth -= 10;
-                monsterCollision = true; // Mark that collision has occurred
-                collisionStartTime = Date.now(); // Record the time of collision
-            } else {
-                // Continuous damage after first contact
-                const currentTime = Date.now();
-                if (currentTime - collisionStartTime >= 500) { // Apply damage every 500ms
-                    playerHealth -= 2; // Reduced continuous damage
-                    collisionStartTime = currentTime; // Update the collision time
-                }
-            }
-        }
-
-        // Check collision with bullets (monster dies after one bullet)
-        bullets.forEach((bullet, bulletIndex) => {
+        // Check collision with monsters
+        monsters.forEach((monster, monsterIndex) => {
             if (
                 bullet.x < monster.x + monster.width &&
                 bullet.x + bullet.width > monster.x &&
                 bullet.y < monster.y + monster.height &&
                 bullet.y + bullet.height > monster.y
             ) {
-                monsters.splice(index, 1); // Remove monster
-                bullets.splice(bulletIndex, 1); // Remove bullet
+                bullets.splice(index, 1); // Remove bullet
+                monsters.splice(monsterIndex, 1); // Remove monster
                 monstersKilled++;
             }
         });
+    });
+}
 
-        // Draw monster
+function updateMonsters() {
+    monsters.forEach((monster, index) => {
+        // If monster is falling, keep falling until it reaches MONSTER_STOP_Y
+        if (!monster.attacking) {
+            monster.y += monster.speed;
+            if (monster.y >= MONSTER_STOP_Y) {
+                monster.attacking = true; // Stop falling and start attacking
+            }
+        }
+
+        // If the monster is attacking, move towards the player
+        if (monster.attacking) {
+            if (monster.x < player.x) {
+                monster.x += monster.speed;
+            } else if (monster.x > player.x) {
+                monster.x -= monster.speed;
+            }
+        }
+
+        // Check collision with the player
+        if (
+            player.x < monster.x + monster.width &&
+            player.x + player.width > monster.x &&
+            player.y < monster.y + monster.height &&
+            player.y + player.height > monster.y
+        ) {
+            monsters.splice(index, 1);
+            playerHealth -= 10;
+            if (playerHealth <= 0) gameOver = true;
+        }
+
+        // Remove off-screen monsters
+        if (monster.x < -monster.width || monster.x > canvas.width + monster.width || monster.y > canvas.height) {
+            monsters.splice(index, 1);
+        }
+    });
+}
+
+// Function to draw the player with flip based on 'facing' variable
+function drawPlayer() {
+    ctx.save(); // Save current state of the canvas
+    if (player.facing === "left") {
+        ctx.scale(-1, 1); // Flip the player image horizontally
+        ctx.drawImage(player.image, -player.x - player.width, player.y, player.width, player.height); 
+    } else {
+        ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
+    }
+    ctx.restore(); // Restore to the original canvas state
+}
+
+
+function drawBullets() {
+    bullets.forEach((bullet) => {
+        ctx.fillStyle = "red";
+        ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+    });
+}
+
+function drawMonsters() {
+    monsters.forEach((monster) => {
         ctx.drawImage(monsterImage, monster.x, monster.y, monster.width, monster.height);
     });
+}
 
-    // Display player health
+function gameloop() {
+    if (gameOver) {
+        alert("Game Over! Try Again.");
+        document.location.reload();
+        return;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Update game elements
+    if (Math.random() * 100 < 1) spawnMonster();
+    updateBullets();
+    updateMonsters();
+
+    // Apply gravity only after jump
+    if (player.jumping) {
+        player.velocityY += GRAVITY;
+    }
+    player.y += player.velocityY;
+
+    // Prevent player from falling below the floor
+    if (player.y > canvas.height - 290) {
+        player.y = canvas.height - 290;
+        player.velocityY = 0;  // Stop downward velocity when on the ground
+        player.jumping = false;  // Player is not jumping anymore
+    }
+
+    // Player movement
+    let movementSpeed = BASE_PLAYER_SPEED;
+
+    if (player.jumping) {
+        // Double movement speed while jumping
+        movementSpeed *= 2;
+    }
+
+    if (keys["ArrowLeft"] || keys["a"]) {
+        player.x -= movementSpeed;
+        player.facing = "left";
+    }
+    if (keys["ArrowRight"] || keys["d"]) {
+        player.x += movementSpeed;
+        player.facing = "right";
+    }
+    if ((keys["ArrowUp"] || keys["w"]) && !player.jumping) {
+        player.velocityY = JUMP_FORCE; // Initiate jump
+        player.jumping = true; // Set jumping flag
+    }
+
+    // Draw game elements
+    drawPlayer();
+    drawBullets();
+    drawMonsters();
+
+    // Display stats
     ctx.fillStyle = "white";
     ctx.font = "20px Arial";
     ctx.fillText(`Health: ${playerHealth}`, 20, 30);
+    ctx.fillText(`Monsters Killed: ${monstersKilled}`, 20, 60);
 
-    // Display level and monsters left
-    ctx.fillText(`Level: ${level}`, 20, 60);
-    ctx.fillText(`Monsters Left: ${totalMonsters - monstersKilled}`, 20, 90);
-
-    // Spawn monsters if needed
-    if (monsters.length < totalMonsters - monstersKilled && Math.random() < 0.02) {
-        spawnMonster();
-    }
-
-    // Check for game over
-    if (playerHealth <= 0) {
-        gameOver = true;
-    }
-
-    // Check for level progression
-    if (monstersKilled === totalMonsters) {
-        nextLevel();
-    }
-
-    // Continue the game loop
     requestAnimationFrame(gameloop);
 }
 
-// Function to spawn a monster
-function spawnMonster() {
-    const spawnX = Math.random() < 0.5 ? 0 : canvas.width; // Spawn on left or right edge
-    const monster = {
-        x: spawnX,
-        y: player.originalY + 30,
-        width: 50,
-        height: 50,
-        health: 1, // Monster health is 1 for level 1
-    };
-    monsters.push(monster);
-}
+// Event listeners
+document.addEventListener("keydown", (e) => {
+    keys[e.key] = true;
+    if (e.key === " " || e.key === "z") shootBullet(); // Space or "z" to shoot
+});
 
-// Function to shoot a bullet
-function shootBullet() {
-    if (bulletReloading || currentBullets >= maxBullets) return;
+document.addEventListener("keyup", (e) => {
+    keys[e.key] = false;
+});
 
-    const bullet = {
-        x: player.facing === "right" ? player.x + player.width : player.x,
-        y: player.y + player.height / 2,
-        width: 10,
-        height: 5,
-        direction: player.facing,
-    };
 
-    bullets.push(bullet);
-    currentBullets++; // Increment the number of bullets fired
 
-    // Start reload timer after shooting the magazine
-    if (currentBullets >= maxBullets) {
-        bulletReloading = true;
-        setTimeout(() => {
-            bulletReloading = false; // Allow shooting again after reload
-            currentBullets = 0; // Reset bullet count for the next magazine
-        }, reloadTime);
-    }
-}
-
-// Function to progress to the next level
-function nextLevel() {
-    level++;
-    totalMonsters += 20; // Increase monster count
-    monstersKilled = 0; // Reset kill count
-    playerHealth = 100; // Restore health
-    // Show level transition message
-    displayLevelTransition();
-}
-
-// Function to display level transition message
-function displayLevelTransition() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white";
-    ctx.font = "50px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText(`Level ${level} Starting!`, canvas.width / 2, canvas.height / 2);
-    setTimeout(() => {
-        gameloop(); // Resume the game after a short pause
-    }, 2000); // 2-second pause before continuing
-}
-
-// Function to display game over and restart button
-function displayGameOver() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "red";
-    ctx.font = "50px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
-
-    // Draw Restart Button
-    ctx.fillStyle = "white";
-    ctx.font = "30px Arial";
-    ctx.fillText("Click to Restart", canvas.width / 2, canvas.height / 2 + 60);
-
-    // Restart game on click
-    canvas.addEventListener("click", restartGame);
-}
-
-// Function to restart the game
-function restartGame() {
-    playerHealth = 100;
-    level = 1;
-    totalMonsters = 40;
-    monstersKilled = 0;
-    monsters.length = 0; // Clear monsters
-    bullets.length = 0; // Clear bullets
-    currentBullets = 0; // Reset bullet count
-    gameOver = false; // Reset game over state
-    gameloop(); // Restart the game loop
-}
+// Start the game
+gameloop();

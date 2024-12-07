@@ -1,7 +1,9 @@
 body{
     margin: 0;
     padding: 0;
-    background-color: black;
+    background: url('Assets/bg3.png') no-repeat center center fixed; /* Background image */
+    background-size: cover; /* Make sure the image covers the entire screen */
+    background-position: center; /* Ensure the image is centered */
     overflow: hidden;  /* Remove scrollbars */   
 }
 #gameCanvas {

@@ -16,3 +16,46 @@ body{
     font-family: Arial, sans-serif;
     text-align: center;
 }
+
+#play-game-btn, #difficulty-btn {
+    position: absolute;
+    width: 400px; /* Smaller width */
+    height: 120px; /* Smaller height */
+    font-size: 50px; /* Smaller font size */
+    font-family: 'Poppins', sans-serif; /* Clean and modern font */
+    font-weight: 600; /* Semi-bold for better emphasis */
+    color: #ffffff; /* White text for better contrast */
+    border: 3px solid #3498db; /* Cool blue border */
+    border-radius: 15px; /* Rounded corners for modern design */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    cursor: pointer; /* Pointer cursor for interactivity */
+    transition: all 0.3s ease; /* Smooth transitions for hover effects */
+    text-align: center; /* Center text horizontally */
+    line-height: 120px; /* Adjusted line height for vertical centering */
+    text-transform: uppercase; /* Makes text all caps */
+    letter-spacing: 2px; /* Slight spacing for modern look */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Soft shadow for emphasis */
+    background-color: #6ec1e4; /* Soft bluish color */
+}
+
+#play-game-btn {
+    top: 90px; /* Distance from the top of the window */
+    right: 60px; /* Distance from the right side of the window */
+}
+
+#difficulty-btn {
+    top: 220px; /* Positioned below the play button */
+    right: 60px; /* Aligned with the play button on the right side */
+}
+
+#play-game-btn:hover, #difficulty-btn:hover {
+    background-color: #4a90e2; /* Slightly darker blue on hover */
+    color: #ffffff; /* White text on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Subtle shadow on hover */
+}
+
+#play-game-btn:active, #difficulty-btn:active {
+    transform: scale(0.98); /* Slight press-down effect */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Softer shadow on press */
+}
