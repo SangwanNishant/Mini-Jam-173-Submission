@@ -22,11 +22,11 @@ app.get('/game-easy', (req,res)=>{
 })
 
 app.get('/game-medium', (req,res)=>{
-    res.sendFile(path.join(__dirname,"public", "game-medium.html"))
+    res.sendFile(path.join(__dirname,"public", "medium-game.html"))
 })
 
 app.get('/game-hard', (req,res)=>{
-    res.sendFile(path.join(__dirname,"public", "game-hard.html"))
+    res.sendFile(path.join(__dirname,"public", "hard-game.html"))
 })
 
 app.listen(PORT,()=>{

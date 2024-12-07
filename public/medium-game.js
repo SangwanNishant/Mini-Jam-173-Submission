@@ -9,8 +9,8 @@ canvas.height = window.innerHeight;
 const BRIDGE_HEIGHT_FACTOR = 0.76;
 
 // Game constants and variables
-const BASE_PLAYER_SPEED = 7;
-const JUMP_FORCE = -30;
+const BASE_PLAYER_SPEED = 6;
+const JUMP_FORCE = -25;
 const GRAVITY = 2.1;
 const BULLET_SPEED = 10;
 
@@ -22,7 +22,14 @@ let bullets = [];
 let monsters = [];
 let maxBullets = 5;
 let bulletReloading = false;
-let reloadTime = 500;
+let reloadTime = 280;
+let bulletsFired = 0;
+let batchReloading = false;
+
+const BATCH_SIZE = 5;
+const NORMAL_RELOAD_TIME = 280;
+const BATCH_RELOAD_TIME = 1800;
+
 let keys = {};
 
 // Player object
@@ -54,7 +61,7 @@ function spawnMonster() {
         y: 0, // Start from the top of the screen
         width: 50,
         height: 50,
-        speed: 2, // Falling speed
+        speed: 2.6, // Slightly faster falling speed
         attacking: false, // To check if it's started attacking
     };
 
@@ -62,7 +69,7 @@ function spawnMonster() {
 }
 
 function shootBullet() {
-    if (bulletReloading || bullets.length >= maxBullets) return;
+    if (bulletReloading || batchReloading || bullets.length >= maxBullets) return;
 
     const bullet = {
         x: player.facing === "right" ? player.x + player.width : player.x,
@@ -73,12 +80,19 @@ function shootBullet() {
     };
 
     bullets.push(bullet);
+    bulletsFired++;
 
-    if (bullets.length >= maxBullets) {
+    // Check if a batch is completed
+    if (bulletsFired % BATCH_SIZE === 0) {
+        batchReloading = true;
+        setTimeout(() => {
+            batchReloading = false;
+        }, BATCH_RELOAD_TIME);
+    } else {
         bulletReloading = true;
         setTimeout(() => {
             bulletReloading = false;
-        }, reloadTime);
+        }, NORMAL_RELOAD_TIME);
     }
 }
 
@@ -109,15 +123,13 @@ function updateBullets() {
 
 function updateMonsters() {
     monsters.forEach((monster, index) => {
-        // If monster is falling, keep falling until it reaches MONSTER_STOP_Y
         if (!monster.attacking) {
             monster.y += monster.speed;
             if (monster.y >= MONSTER_STOP_Y) {
-                monster.attacking = true; // Stop falling and start attacking
+                monster.attacking = true;
             }
         }
 
-        // If the monster is attacking, move towards the player
         if (monster.attacking) {
             if (monster.x < player.x) {
                 monster.x += monster.speed;
@@ -134,27 +146,25 @@ function updateMonsters() {
             player.y + player.height > monster.y
         ) {
             monsters.splice(index, 1);
-            playerHealth -= 10;
+            playerHealth -= 5;
             if (playerHealth <= 0) gameOver = true;
         }
 
-        // Remove off-screen monsters
         if (monster.x < -monster.width || monster.x > canvas.width + monster.width || monster.y > canvas.height) {
             monsters.splice(index, 1);
         }
     });
 }
 
-// Function to draw the player with flip based on 'facing' variable
 function drawPlayer() {
-    ctx.save(); // Save current state of the canvas
+    ctx.save();
     if (player.facing === "left") {
-        ctx.scale(-1, 1); // Flip the player image horizontally
+        ctx.scale(-1, 1);
         ctx.drawImage(player.image, -player.x - player.width, player.y, player.width, player.height);
     } else {
         ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
     }
-    ctx.restore(); // Restore to the original canvas state
+    ctx.restore();
 }
 
 function drawBullets() {
@@ -170,6 +180,13 @@ function drawMonsters() {
     });
 }
 
+// Redirect to the win page after killing 100 monsters
+function checkWin() {
+    if (monstersKilled >= 100) {
+        window.location.href = '/win'; // Redirect to the win page
+    }
+}
+
 function gameloop() {
     if (gameOver) {
         alert("Game Over! Try Again.");
@@ -179,29 +196,24 @@ function gameloop() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Update game elements
-    if (Math.random() * 100 < 1) spawnMonster();
+    if (Math.random() * 100 < 1.5) spawnMonster();
     updateBullets();
     updateMonsters();
 
-    // Apply gravity only after jump
     if (player.jumping) {
         player.velocityY += GRAVITY;
     }
     player.y += player.velocityY;
 
-    // Prevent player from falling below the floor
     if (player.y > canvas.height * BRIDGE_HEIGHT_FACTOR - 110) {
         player.y = canvas.height * BRIDGE_HEIGHT_FACTOR - 110;
-        player.velocityY = 0; // Stop downward velocity when on the ground
-        player.jumping = false; // Player is not jumping anymore
+        player.velocityY = 0;
+        player.jumping = false;
     }
 
-    // Player movement
     let movementSpeed = BASE_PLAYER_SPEED;
 
     if (player.jumping) {
-        // Double movement speed while jumping
         movementSpeed *= 2;
     }
 
@@ -214,20 +226,20 @@ function gameloop() {
         player.facing = "right";
     }
     if ((keys["ArrowUp"] || keys["w"]) && !player.jumping) {
-        player.velocityY = JUMP_FORCE; // Initiate jump
-        player.jumping = true; // Set jumping flag
+        player.velocityY = JUMP_FORCE;
+        player.jumping = true;
     }
 
-    // Draw game elements
     drawPlayer();
     drawBullets();
     drawMonsters();
 
-    // Display stats
     ctx.fillStyle = "white";
     ctx.font = "20px Arial";
     ctx.fillText(`Health: ${playerHealth}`, 20, 30);
     ctx.fillText(`Monsters Killed: ${monstersKilled}`, 20, 60);
+
+    checkWin(); // Check for win condition
 
     requestAnimationFrame(gameloop);
 }
@@ -235,7 +247,7 @@ function gameloop() {
 // Event listeners
 document.addEventListener("keydown", (e) => {
     keys[e.key] = true;
-    if (e.key === " " || e.key === "z") shootBullet(); // Space or "z" to shoot
+    if (e.key === " " || e.key === "z") shootBullet();
 });
 
 document.addEventListener("keyup", (e) => {
