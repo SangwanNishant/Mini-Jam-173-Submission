@@ -1,0 +1,14 @@
+body{
+    margin: 0;
+    padding: 0;
+    background: url('Assets/bg2.png') no-repeat center center fixed; /* Background image */
+    background-size: cover; /* Make sure the image covers the entire screen */
+    background-position: center; /* Ensure the image is centered */
+    overflow: hidden;  /* Remove scrollbars */   
+}
+#gameCanvas {
+    display: block;  /* Ensures no space around the canvas */
+    position: absolute;
+    top: 0;
+    left: 0;
+}
