@@ -9,7 +9,6 @@ body{
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: url('Assets/menu.png') no-repeat center center fixed; /* Background image */
     background-size: cover; /* Make sure the image covers the entire screen */
     background-position: center; /* Ensure the image is centered */
     color: white;
@@ -17,6 +16,9 @@ body{
     text-align: center;
 }
 
+.hidden{
+    display: none;
+}
 #play-game-btn, #difficulty-btn {
     position: absolute;
     width: 400px; /* Smaller width */
