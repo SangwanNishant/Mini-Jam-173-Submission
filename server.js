@@ -6,7 +6,11 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static('public'))
 
 app.get('/', (req,res)=>{
-    res.sendFile(path.join(__dirname,"public", "menu.html"))
+    res.sendFile(path.join(__dirname,"public", "index.html"))
+})
+
+app.get('/info',(req,res)=>{
+    res.sendFile(path.join(__dirname,"public", "info.html"))
 })
 
 app.get('/game', (req,res)=>{

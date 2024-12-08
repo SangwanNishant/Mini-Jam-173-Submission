@@ -185,23 +185,22 @@ function gameloop() {
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Update game elements
+    
     if (Math.random() * 100 < 1) spawnMonster();
     updateBullets();
     updateMonsters();
 
-    // Apply gravity only after jump
+   
     if (player.jumping) {
         player.velocityY += GRAVITY;
     }
     player.y += player.velocityY;
 
-    // Prevent player from falling below the floor
+   
     if (player.y > canvas.height * BRIDGE_HEIGHT_FACTOR - 110) {
         player.y = canvas.height * BRIDGE_HEIGHT_FACTOR - 110;
-        player.velocityY = 0; // Stop downward velocity when on the ground
-        player.jumping = false; // Player is not jumping anymore
+        player.velocityY = 0; 
+        player.jumping = false; 
     }
 
     // Player movement
@@ -228,16 +227,15 @@ function gameloop() {
     }
 
     if ((keys["ArrowUp"] || keys["w"]) && !player.jumping) {
-        player.velocityY = JUMP_FORCE; // Initiate jump
-        player.jumping = true; // Set jumping flag
+        player.velocityY = JUMP_FORCE; 
+        player.jumping = true; 
     }
 
-    // Draw game elements
     drawPlayer();
     drawBullets();
     drawMonsters();
 
-    // Display stats
+   
     ctx.fillStyle = "white";
     ctx.font = "20px Arial";
     ctx.fillText(`Health: ${playerHealth}`, 20, 30);
@@ -246,7 +244,7 @@ function gameloop() {
     requestAnimationFrame(gameloop);
 }
 
-// Event listeners
+
 document.addEventListener("keydown", (e) => {
     keys[e.key] = true;
     if (e.key === " " || e.key === "z") shootBullet(); // Space or "z" to shoot
@@ -259,16 +257,16 @@ document.addEventListener("keyup", (e) => {
 const backgroundImage = new Image();
 backgroundImage.src = 'Assets/bg3.png';
 backgroundImage.onload = () => {
-     // Apply the background image to the body
+     
      document.body.style.backgroundImage = `url(${backgroundImage.src})`;
-     document.body.style.backgroundSize = "cover";  // Make the background image cover the whole screen
-     document.body.style.backgroundPosition = "center";  // Center the image
-     document.body.style.backgroundRepeat = "no-repeat";  // Prevent repeating the image
+     document.body.style.backgroundSize = "cover";  
+     document.body.style.backgroundPosition = "center";  
+     document.body.style.backgroundRepeat = "no-repeat";  
  
-     // Optionally, ensure the body takes full viewport height
+     
      document.body.style.height = "100vh";
-     document.body.style.margin = "0";  // Remove default body margin
+     document.body.style.margin = "0";  
 
-    // Once the background image is loaded, start the game loop
+    
     gameloop();
 };

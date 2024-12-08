@@ -33,10 +33,9 @@ const BATCH_RELOAD_TIME = 1250;
 
 let keys = {};
 
-// Player object
 const player = {
     x: 300,
-    y: canvas.height * 0.76 - 100, // Correct spawn point
+    y: canvas.height * 0.76 - 100, 
     width: 100,
     height: 100,
     velocityY: 0,
@@ -60,11 +59,11 @@ function spawnMonster() {
 
     const monster = {
         x: spawnX,
-        y: 0, // Start from the top of the screen
+        y: 0,
         width: 60,
         height: 60,
-        speed: 2.9, // Slightly faster falling speed
-        attacking: false, // To check if it's started attacking
+        speed: 2.9, 
+        attacking: false,
     };
 
     monsters.push(monster);
@@ -283,16 +282,13 @@ document.addEventListener("keyup", (e) => {
 const backgroundImage = new Image();
 backgroundImage.src = 'Assets/bg1.png';
 backgroundImage.onload = () => {
-     // Apply the background image to the body
      document.body.style.backgroundImage = `url(${backgroundImage.src})`;
-     document.body.style.backgroundSize = "cover";  // Make the background image cover the whole screen
-     document.body.style.backgroundPosition = "center";  // Center the image
-     document.body.style.backgroundRepeat = "no-repeat";  // Prevent repeating the image
-     
-     // Optionally, ensure the body takes full viewport height
-     document.body.style.height = "100vh";
-     document.body.style.margin = "0";  // Remove default body margin
+     document.body.style.backgroundSize = "cover";  
+     document.body.style.backgroundPosition = "center";  
+     document.body.style.backgroundRepeat = "no-repeat";  
 
-    // Once the background image is loaded, start the game loop
+     document.body.style.height = "100vh";
+     document.body.style.margin = "0";  
+
     gameloop();
 };

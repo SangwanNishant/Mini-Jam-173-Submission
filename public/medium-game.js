@@ -1,11 +1,10 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Set canvas size to the full window
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Game constants and variables
+
 const BASE_PLAYER_SPEED = 6;
 const JUMP_FORCE = -25;
 const GRAVITY = 2.1;
@@ -29,10 +28,10 @@ const BATCH_RELOAD_TIME = 1250;
 
 let keys = {};
 
-// Player object
+
 const player = {
     x: 300,
-    y: canvas.height * 0.76 - 110, // Correct spawn point
+    y: canvas.height * 0.76 - 110, 
     width: 110,
     height: 110,
     velocityY: 0,
@@ -46,21 +45,19 @@ player.image.src = "Assets/player 1.png"; // Player image
 const monsterImage = new Image();
 monsterImage.src = "Assets/blue-monster.png"; // Monster image
 
-// Constants for monster behavior
+// Constants for monster 
 const MONSTER_STOP_Y = canvas.height * 0.76 - 60; // Y position where monsters stop falling
-
-// Functions
 
 function spawnMonster() {
     const spawnX = Math.random() * (canvas.width - 50); // Spawn randomly on X-axis
 
     const monster = {
         x: spawnX,
-        y: 0, // Start from the top of the screen
+        y: 0, 
         width: 50,
         height: 50,
-        speed: 2.8, // Slightly faster falling speed
-        attacking: false, // To check if it's started attacking
+        speed: 2.8, 
+        attacking: false, 
     };
 
     monsters.push(monster);
@@ -80,7 +77,6 @@ function shootBullet() {
     bullets.push(bullet);
     bulletsFired++;
 
-    // Check if a batch is completed
     if (bulletsFired % BATCH_SIZE === 0) {
         batchReloading = true;
         setTimeout(() => {
@@ -98,7 +94,7 @@ function reloadBullets() {
     if (bullets.length < maxBullets) {
         const bulletsToReload = maxBullets - bullets.length;
         for (let i = 0; i < bulletsToReload; i++) {
-            shootBullet();  // Refill the bullets
+            shootBullet();  
         }
     }
 }
@@ -224,16 +220,15 @@ function gameloop() {
         movementSpeed *= 2;
     }
 
-        // Player movement logic with canvas boundaries
     if (keys["ArrowLeft"] || keys["a"]) {
-        if (player.x > 40) { // Prevent moving left out of bounds
+        if (player.x > 40) { 
             player.x -= movementSpeed;
             player.facing = "left";
         }
     }
 
     if (keys["ArrowRight"] || keys["d"]) {
-        if (player.x < canvas.width - player.width - 100) { // Prevent moving right out of bounds
+        if (player.x < canvas.width - player.width - 100) { 
             player.x += movementSpeed;
             player.facing = "right";
         }
@@ -253,16 +248,16 @@ function gameloop() {
     ctx.fillText(`Health: ${playerHealth}`, 20, 30);
     ctx.fillText(`Monsters Killed: ${monstersKilled}`, 20, 60);
 
-    checkWin(); // Check for win condition
+    checkWin(); 
 
     requestAnimationFrame(gameloop);
 }
 
-// Event listeners
+
 document.addEventListener("keydown", (e) => {
     keys[e.key] = true;
     if (e.key === " " || e.key === "z") shootBullet();
-    if (e.key === "r" || e.key === "R") reloadBullets(); // Reload bullets when 'R' is pressed
+    if (e.key === "r" || e.key === "R") reloadBullets(); 
 });
 
 document.addEventListener("keyup", (e) => {
@@ -272,16 +267,14 @@ document.addEventListener("keyup", (e) => {
 const backgroundImage = new Image();
 backgroundImage.src = 'Assets/bg3.png';
 backgroundImage.onload = () => {
-     // Apply the background image to the body
+    
      document.body.style.backgroundImage = `url(${backgroundImage.src})`;
-     document.body.style.backgroundSize = "cover";  // Make the background image cover the whole screen
-     document.body.style.backgroundPosition = "center";  // Center the image
-     document.body.style.backgroundRepeat = "no-repeat";  // Prevent repeating the image
+     document.body.style.backgroundSize = "cover";  
+     document.body.style.backgroundPosition = "center"; 
+     document.body.style.backgroundRepeat = "no-repeat";  
  
-     // Optionally, ensure the body takes full viewport height
      document.body.style.height = "100vh";
-     document.body.style.margin = "0";  // Remove default body margin
+     document.body.style.margin = "0";  
 
-    // Once the background image is loaded, start the game loop
     gameloop();
 };
